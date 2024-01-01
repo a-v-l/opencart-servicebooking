@@ -1,0 +1,451 @@
+{{ header }}
+<style>
+.help-text {
+    color: #666;
+    font-size: 11px;
+    padding-top: 2px;
+}
+label, input[type="button"], input[type="checkbox"], input[type="file"], input[type="radio"] {
+    font-weight: normal !important;
+}
+div.short, input[type="text"].short {
+    width: 42px !important;
+}
+.ready {
+  color: #0ec30e;
+}
+.done {
+  color: #a2e291;
+}
+.modal-lg {
+    width: 100%;
+    max-width: 1600px;
+    padding: 0 2rem;
+}
+.table-condensed {
+  margin: 0;
+}
+.modal td:not(td:first-of-type) {
+    width: 11.111%;
+    min-width: 100px;
+}
+.modal td.edit-priority {
+    width: 0;
+}
+.table thead td small {
+    font-weight: 400;
+    font-size: 85%;
+}
+sup.required {
+  color: #ef5e5e;
+}
+.color-1 {
+  background: #026fc0;
+  box-shadow: 0 0 0 6px #026fc0 inset;
+  color: #fff;
+}
+.color-2 {
+  background: #ff0200;
+  box-shadow: 0 0 0 6px #ff0200 inset;
+  color: #fff;
+}
+.color-3 {
+  background: #fff;
+  box-shadow: 0 0 0 6px #fff inset;
+}
+.color-4 {
+  background: #f4b284;
+  box-shadow: 0 0 0 6px #f4b284 inset;
+}
+.color-5 {
+  background: #ffff08;
+  box-shadow: 0 0 0 6px #ffff08 inset;
+}
+.color-6 {
+  background: #000; color: #fff;
+  box-shadow: 0 0 0 6px #000 inset;
+}
+.color-7 {
+  background: #ff99cb;
+  box-shadow: 0 0 0 6px #ff99cb inset;
+}
+.color-8 {
+  background: #00b14f;
+  box-shadow: 0 0 0 6px #00b14f inset;
+  color: #fff;
+}
+.priority {
+  background: #999;
+  color: #000;
+}
+td[class*="color"], td.priority {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+</style>
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right pad-bottom-sm">
+					<a id="save-button" class="btn btn-primary"><i class="fa fa-floppy-o pad-right-sm"></i> Speichern</a>
+				<a href="<?php echo $exit; ?>" class="btn btn-default"><i class="fa fa-reply pad-right-sm"></i> Zurück</a>
+			</div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle="tab" href="#bookings" aria-expanded="true">Aufträge</a></li>
+      <li class=""><a data-toggle="tab" href="#settings" aria-expanded="false">Einstellungen</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active" id="bookings">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div class="pull-right">
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-{% if isfilter %}warning{% else %}primary{% endif %} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Status-Filter <span class="caret"></span></button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                  <li><a href="{{ filter_url }}"><i class="fa fa-lg {% if isfilter %}fa-square-o{% else %}fa-check-square-o{% endif %}"></i> Alle anzeigen</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li><a href="{{ filter_url }}&filter=angemeldet"><i class="fa fa-lg {% if isfilter == "angemeldet" %}fa-check-square-o{% else %}fa-square-o{% endif %}"></i> Angemeldet</a></li>
+                  <li><a href="{{ filter_url }}&filter=im%20haus"><i class="fa fa-lg {% if isfilter == "im haus" %}fa-check-square-o{% else %}fa-square-o{% endif %}"></i> Im Haus</a></li>
+                  <li><a href="{{ filter_url }}&filter=fertig"><i class="fa fa-lg {% if isfilter == "fertig" %}fa-check-square-o{% else %}fa-square-o{% endif %}"></i> Fertig</a></li>
+                </ul>
+              </div>
+              <button type="button" id="add-booking" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></button>
+              <button type="button" id="delete-booking" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>
+            </div>
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+          </div>
+          <div class="panel-body">
+            <form id="form-product">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                      <td class="text-left">{{ column_color }}</td>
+                      <td class="text-left">{% if sort == 's.servicebooking_nr' %} <a href="{{ sort_servicebooking_nr }}" class="{{ order|lower }}">{{ column_servicebooking_nr }}</a> {% else %} <a href="{{ sort_servicebooking_nr }}">{{ column_servicebooking_nr }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 's.acceptance' %} <a href="{{ sort_acceptance }}" class="{{ order|lower }}">{{ column_acceptance }}</a> {% else %} <a href="{{ sort_acceptance }}">{{ column_acceptance }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 's.submission' %} <a href="{{ sort_submission }}" class="{{ order|lower }}">{{ column_submission }}</a> {% else %} <a href="{{ sort_submission }}">{{ column_submission }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 's.typ' %} <a href="{{ sort_typ }}" class="{{ order|lower }}">{{ column_typ }}</a> {% else %} <a href="{{ sort_typ }}">{{ column_typ }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 's.customer_name' %} <a href="{{ sort_customer_name }}" class="{{ order|lower }}">{{ column_customer_name }}</a> {% else %} <a href="{{ sort_customer_name }}">{{ column_customer_name }}</a> {% endif %}</td>
+                      <td class="text-left">{{ column_customer_contact }}</td>
+                      <td class="text-left">{{ column_comment }}</td>
+                      <td class="text-left">{{ column_honorar }}</td>
+                      <td class="text-left">{% if sort == 's.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  
+                  {% if servicebookings %}
+                  {% for servicebooking in servicebookings %}
+                  <tr data-id="{{ servicebooking.servicebooking_id }}">
+                    <td class="text-center">
+                      <input type="checkbox" name="selected[]" value="{{ servicebooking.servicebooking_id }}"{% if servicebooking.servicebooking_id in selected %} checked="checked"{% endif %} />
+                    </td>
+                    <td class="text-left list {{ servicebooking.servicebooking_color }} {{ servicebooking.priority }}" data-key="servicebooking_color">{% if servicebooking.week_increment %}{{ servicebooking.week_increment }}{% endif %}</td>
+                    <td class="text-left list" data-key="servicebooking_nr">{{ servicebooking.servicebooking_nr }}</td>
+                    <td class="text-left list" data-key="acceptance">{{ servicebooking.acceptance }}</td>
+                    <td class="text-left list" data-key="submission">{{ servicebooking.submission }}</td>
+                    <td class="text-left list select" data-key="typ">{{ servicebooking.typ }}</td>
+                    <td class="text-left list" data-key="customer_name">{% if servicebooking.customer_id %}<a href="index.php?route=customer/customer/edit&user_token={{ user_token }}&customer_id={{ servicebooking.customer_id }}" title="Zum Kundenprofil von {{ servicebooking.customer_name }}">{% endif %}{{ servicebooking.customer_name }}{% if servicebooking.customer_id %}</a>{% endif %}</td>
+                    <td class="text-left list" data-key="customer_contact">{{ servicebooking.customer_contact }}</td>
+                    <td class="text-left list" data-key="comment">{{ servicebooking.comment }}</td>
+                    <td class="text-left list" data-key="honorar">{{ servicebooking.honorar|replace({'.': ","}) }}{% if servicebooking.honorar%} €{% endif %}</td>
+                    <td class="text-left list select{% if servicebooking.status == 'Fertig' %} ready{% endif %}" data-key="status">{{ servicebooking.status }}</td>
+                    <td class="text-right"><button data-toggle="tooltip" data-nr="{{ servicebooking.servicebooking_nr }}" title="{{ button_edit }}" class="btn btn-primary servicebooking-edit"><i class="fa fa-pencil"></i></button></td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                  </tr>
+                  {% endif %}
+                    </tbody>
+                  
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane" id="settings">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-cog"></i> {{ text_setting }}</h3>
+          </div>
+          <div class="panel-body">
+            <form class="form-horizontal autosave" autocomplete="off" id="settings-form">
+              <div class="form-group">
+                <label class="control-label col-sm-4">Öffnungstage: <div class="help-text">An welchen Tagen können Räder gebracht und geholt werden.</div></label>
+                <div class="col-sm-8">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_1" id="day-1" {% if settings.day_1 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-1">Montag</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_2" id="day-2" {% if settings.day_2 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-2">Dienstag</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_3" id="day-3" {% if settings.day_3 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-3">Mittwoch</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_4" id="day-4" {% if settings.day_4 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-4">Donnerstag</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_5" id="day-5" {% if settings.day_5 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-5">Freitag</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_6" id="day-6" {% if settings.day_6 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-6">Samstag</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" name="day_7" id="day-7" {% if settings.day_7 %}checked{% endif %}>
+                    <label class="form-check-label" for="day-7">Sonntag</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+						    <label class="control-label col-sm-4" for="max-services">Servicebuchungen pro Tag: <div class="help-text">Wieviele Räder/Ski/etc. können maximal pro Tag bearbeitet werden?</div></label>
+						    <div class="col-sm-8">
+				          <input type="text" class="form-control short" name="services_per_day" id="max-services" maxlength="2" value="{{ settings.services_per_day }}">
+								</div>
+					    </div>
+              <div class="form-group">
+						    <label class="control-label col-sm-4" for="service-duration">Bearbeitungsdauer: <div class="help-text">Wieviele <em>Öffnungstage</em> dauert ein Service in der Regel?</div></label>
+						    <div class="col-sm-8">
+				          <input type="text" class="form-control short" name="service_duration" id="service-duration" maxlength="2" value="{{ settings.service_duration }}">
+								</div>
+					    </div>
+              <div class="form-group">
+						    <label class="control-label col-sm-4" for="max-future-weeks">Zeitfenster: <div class="help-text">Wieviele <em>Wochen</em> im Vorraus darf eine Servicebuchungen durch einen Kunden eingetragen werden?</div></label>
+						    <div class="col-sm-8">
+				          <input type="text" class="form-control short" name="max_future_weeks" id="max-future-weeks" maxlength="2" value="{{ settings.max_future_weeks }}">
+								</div>
+					    </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label" for="input-status">Status</label>
+                <div class="col-sm-8">
+                  <select name="module_servicebooking_status" id="input-status" class="form-control">
+                    {% if settings.module_servicebooking_status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="editServicebooking" tabindex="-1" role="dialog" aria-labelledby="editServicebookingLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editServicebookingLabel">Auftrag Nummer <span></span> bearbeiten</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="table-responsive">
+        <form id="save-changes">
+          <table class="table table-bordered table-condensed">
+            <thead>
+              <tr>
+                <td class="text-left">Priorität</td>
+                <td class="text-left">Nr<sup class="required">*</sup></td>
+                <td class="text-left">Annahme<sup class="required">*</sup></br><small>YYYY-MM-DD</small></td>
+                <td class="text-left">Abgabe<sup class="required">*</sup></br><small>YYYY-MM-DD</small></td>
+                <td class="text-left">{{ column_typ }}<sup class="required">*</sup></td>
+                <td class="text-left">Name<sup class="required">*</sup></td>
+                <td class="text-left">{{ column_customer_contact }}</td>
+                <td class="text-left">{{ column_comment }}</td>
+                <td class="text-left">{{ column_honorar }}</br><small>in EUR mit Punkt!</small></td>
+                <td class="text-left">Status<sup class="required">*</sup></td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left edit edit-priority"><input name="priority" class="form-control input-sm" type="checkbox"></td>
+                <td class="text-left edit edit-servicebooking_nr"><input name="servicebooking_nr" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-acceptance"><input name="acceptance" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-submission"><input name="submission" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-typ"><select name="typ" class="form-control input-sm">
+                  <option value="Kleine Inspektion">Kleine Inspektion</option>
+                  <option value="Instandsetzung">Instandsetzung</option>
+                  <option value="Große Inspektion">Große Inspektion</option>
+                  <option value="Winterservice">Winterservice</option>
+                </select></td>
+                <td class="text-left edit edit-customer_name"><input name="customer_name" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-customer_contact"><input name="customer_contact" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-comment"><input name="comment" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-honorar"><input name="honorar" class="form-control input-sm" type="text"></td>
+                <td class="text-left edit edit-status"><select name="status" class="form-control input-sm">
+                  <option value="Angemeldet">Angemeldet</option>
+                  <option value="Im Haus">Im Haus</option>
+                  <option value="Fertig">Fertig</option>
+                </select></td>
+              </tr>
+            </tbody>
+          </table>
+          {# entry: existing|new #}
+          <input id="entry" type="hidden" name="entry" value="">
+          <input id="entry-id" type="hidden" name="servicebooking_id" value="">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Änderungen verwerfen</button>
+        <button id="submit-changes" type="button" class="btn btn-primary">Änderungen speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// save settings
+$('#save-button').on('click', function(e){
+  e.preventDefault();
+  var data = $('#settings-form').serialize();
+  jQuery.post(
+    'index.php?route=extension/module/servicebooking/saveSettings&user_token={{ user_token }}',
+    data,
+    function(msg) {
+      alert(msg);
+      location.reload();
+    }
+  );
+})
+// open modal to edit servicebooking item
+$('.servicebooking-edit').on('click', function(e){
+  e.preventDefault();
+  var $this = $(this),
+      $tr = $this.parent().parent(),
+      nr = $this.data('nr');
+  $('.modal-footer button:first-of-type').text('Änderungen verwerfen').next().text('Änderungen speichern');
+  $('#entry').val('existing');
+  $('#entry-id').val($tr.data('id'));
+  $('#editServicebookingLabel span').text(nr);
+  $tr.find('.list').each(function(elem){
+    var $elem = $(this),
+      key = $elem.data('key'),
+      value = $(this).text(),
+      field = $elem.hasClass('select') ? ' select' : ' input';
+    if (key == 'honorar'){
+      value = parseFloat(value.replace(',','.'));
+      value = !!value ? value : '';
+    }
+    $('.edit-' + key + field).val(value);
+  });
+  $('.edit-priority input').prop('checked', !!$tr.find('.priority').length);
+  $('#editServicebooking').modal();
+});
+// save edited or new servicebooking item
+$('#submit-changes').on('click', function(e){
+  e.preventDefault();
+  var data = $('#save-changes').serialize();
+  //console.log(data);
+  jQuery.post(
+    'index.php?route=extension/module/servicebooking/saveChanges&user_token={{ user_token }}',
+    data,
+    function(response) {
+      response = JSON.parse(response);
+      alert(response.msg);
+      if (response.pass){
+        $('#editServicebooking').modal('hide');
+        location.reload();
+      }
+    }
+  );
+});
+// open modal to add servicebooking item
+$('#add-booking').on('click', function(e){
+  e.preventDefault();
+  var now = new Date(),
+      day = now.getDay(),
+      check = day,
+      open = {
+        day_1: {% if settings.day_1 %}1{% else %}0{% endif %},
+        day_2: {% if settings.day_2 %}1{% else %}0{% endif %},
+        day_3: {% if settings.day_3 %}1{% else %}0{% endif %},
+        day_4: {% if settings.day_4 %}1{% else %}0{% endif %},
+        day_5: {% if settings.day_5 %}1{% else %}0{% endif %},
+        day_6: {% if settings.day_6 %}1{% else %}0{% endif %},
+        day_7: {% if settings.day_7 %}1{% else %}0{% endif %}
+      },
+      total_open = open.day_1+open.day_2+open.day_3+open.day_4+open.day_5+open.day_6+open.day_7,
+      service_duration = {{ settings.service_duration }},
+      circle = Math.ceil(service_duration/total_open)*7,
+      future = 0,
+      new_servicebooking_nr = {{ new_servicebooking_nr }};
+  day = day == 0 ? 7 : day; // Sunday = 7
+  // Bearbeitungszeit + Schließtage
+  for (var i=day; i <= (day+circle); i++){
+    // ein weiterer Tag
+      ++future;
+      // welcher Wochentag?
+      check = check > 6 ? check - 6 : check+1;
+    // Gearbeitet wir nur an offenen Tagen
+    if(open['day_'+check] == 1) --service_duration;
+    // Wenn Bearbeitungszeit rum UND offen dann ist fertig
+    if(service_duration <= 0   && open['day_'+check] == 1) break;
+  }
+  var then = new Date(new Date().setDate(now.getDate() + future));
+  $('.modal-footer button:first-of-type').text('Eintrag verwerfen').next().text('Eintrag speichern');
+  $('#save-changes :input').val('');
+  $('#entry').val('new');
+  $('#save-changes .edit-servicebooking_nr input').val(new_servicebooking_nr);
+  $('#save-changes .edit-acceptance input').val(now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2)+"-"+("0"+now.getDate()).slice(-2));
+  $('#save-changes .edit-submission input').val(then.getFullYear()+"-"+("0"+(then.getMonth()+1)).slice(-2)+"-"+("0"+then.getDate()).slice(-2));
+  $('#save-changes .edit-typ select').val('Kleine Inspektion');
+  $('#save-changes .edit-status select').val('Im Haus');
+
+  $('#editServicebooking').modal();
+});
+// Delete servicebooking item
+$('#delete-booking').on('click', function(e){
+  e.preventDefault();
+  if (confirm('{{ text_confirm }}')) {
+    var data = $('#form-product').serialize();
+    jQuery.post(
+      'index.php?route=extension/module/servicebooking/deleteEntry&user_token={{ user_token }}',
+      data,
+      function(msg) {
+        alert(msg);
+        location.reload();
+      }
+    );
+  }
+});
+$('#filter-booking').tooltip();
+// https://stackoverflow.com/a/21903119/1106393
+var getUrlParameter=function(d){var c=window.location.search.substring(1).split("&"),a;for(a=0;a<c.length;a++){var b=c[a].split("=");if(b[0]===d)return void 0===b[1]?!0:decodeURIComponent(b[1])}};
+var modBookingNr;
+if (modBookingNr = getUrlParameter('servicebooking_nr')) {
+  $('[data-nr="' + modBookingNr + '"]').click();
+}
+</script>
+{{ footer }}

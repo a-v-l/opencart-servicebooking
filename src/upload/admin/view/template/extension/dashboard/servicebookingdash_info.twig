@@ -1,0 +1,53 @@
+<style>
+.color {border-right: 1px solid #ddd}
+.color-1 {background: #026fc0; color: #fff;}
+.color-2 {background: #ff0200; color: #fff;}
+.color-3 {background: #fff}
+.color-4 {background: #f4b284}
+.color-5 {background: #ffff08}
+.color-6 {background: #000; color: #fff;}
+.color-7 {background: #ff99cb}
+.color-8 {background: #00b14f; color: #fff;}
+td[class*="color"] {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+</style>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><i class="fa fa-calendar fw"></i> {{ heading_title }}</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <td class="text-left">{{ column_color }}</td>
+          <td class="text-right">{{ column_servicebooking_nr }}</td>
+          <td>{{ column_acceptance }}</td>
+          <td>{{ column_customer_name }}</td>
+          <td>{{ column_customer_contact }}</td>
+          <td class="text-right">{{ column_action }}</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% if bookings %}
+        {% for booking in bookings %}
+        <tr>
+          <td class="color {{ booking.color }}">{% if booking.week_increment %}{{ booking.week_increment }}{% endif %}</td>
+          <td class="text-right">{{ booking.servicebooking_nr }}</td>
+          <td>{{ booking.acceptance }}</td>
+          <td>{{ booking.customer_name }}</td>
+          <td>{{ booking.customer_contact }}</td>
+          <td class="text-right"><a href="{{ booking.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-info"><i class="fa fa-pencil"></i></a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td class="text-center" colspan="6">{{ text_no_results }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
