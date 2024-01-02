@@ -2,12 +2,6 @@
     "name": "a-v-l/opencart-servicebooking",
     "description": "Extension to offer service bookings",
     "type": "opencart-extension",
-    "require": {
-        "opencart/opencart": "3.0.*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^10.5"
-    },
     "license": "GPL-3.0",
     "authors": [
         {
